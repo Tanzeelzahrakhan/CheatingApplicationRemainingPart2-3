@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "215950675218",
+    "project_id": "cheatingapp-f953e",
+    "storage_bucket": "cheatingapp-f953e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:215950675218:android:9d948c0a9b7e7d354ab7cb",
+        "android_client_info": {
+          "package_name": "com.example.cheatingapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "215950675218-k1vnf7lqag16k7spgda1cl497592032p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGfpcfjxGJzA6Zpx_ucaeOfzwszBlHEnI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "215950675218-k1vnf7lqag16k7spgda1cl497592032p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
