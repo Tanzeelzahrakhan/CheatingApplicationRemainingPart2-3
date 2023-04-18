@@ -3,7 +3,7 @@ package com.example.cheatingapp.ModelClass;
 public class myMessage {
     private String messageId, message, senderId;
     private long timestamp;
-    private int feeling;
+    private int feeling=-1;
 
 
     public myMessage() {

@@ -33,18 +33,17 @@ FirebaseDatabase database;
         super.onCreate(savedInstanceState);
         binding=ActivityChatBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        messages=new ArrayList<>();
         String name=getIntent().getStringExtra("name");
         String receiverUid=getIntent().getStringExtra("uid");
         String senderUid= FirebaseAuth.getInstance().getUid();
 
-        messages=new ArrayList<>();
-        adapter=new MessagesAdapter(this,messages);
-        binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        binding.recyclerView.setAdapter(adapter);
-
-
         senderRoom=senderUid+receiverUid;
         receiverRoom=receiverUid+senderUid;
+      /*  adapter=new MessagesAdapter(this,messages,senderRoom,receiverRoom);*/
+        adapter=new MessagesAdapter(this,messages,senderRoom,receiverRoom);
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        binding.recyclerView.setAdapter(adapter);
 
         database=FirebaseDatabase.getInstance();
         database.getReference().child("chats").child(senderRoom).child("messages").addValueEventListener(new ValueEventListener() {
@@ -53,6 +52,7 @@ FirebaseDatabase database;
                                                 messages.clear();
                                                 for (DataSnapshot snapshot1:snapshot.getChildren()){
                                                     myMessage message=snapshot1.getValue(myMessage.class);
+                                                    message.setMessageId(snapshot1.getKey());
                                                     messages.add(message);
                                                 }
                                                 adapter.notifyDataSetChanged();
@@ -73,16 +73,18 @@ FirebaseDatabase database;
                 Date date=new Date();
              myMessage  message=new myMessage(messageTxt,senderUid, date.getTime());
                binding.messageBox.setText("");
+
+               String randomKey=database.getReference().push().getKey();
                 database.getReference().child("chats").child(senderRoom)
                         .child("messages")
-                        .push()
+                        .child(randomKey)
                         .setValue(message).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void unused) {
                                 database.getReference().child("chats")
                                         .child(receiverRoom)
                                         .child("messages")
-                                        .push()
+                                        .child(randomKey)
                                         .setValue(message).addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void unused) {

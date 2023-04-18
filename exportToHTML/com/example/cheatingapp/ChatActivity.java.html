@@ -1,0 +1,128 @@
+<html>
+<head>
+<title>ChatActivity.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #000080; font-weight: bold;}
+.s1 { color: #000000;}
+.s2 { color: #008000; font-weight: bold;}
+</style>
+</head>
+<body bgcolor="#ffffff">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+ChatActivity.java</font>
+</center></td></tr></table>
+<pre><span class="s0">package </span>com.example.cheatingapp;
+
+<span class="s0">import </span>androidx.annotation.NonNull;
+<span class="s0">import </span>androidx.appcompat.app.AppCompatActivity;
+<span class="s0">import </span>androidx.recyclerview.widget.LinearLayoutManager;
+
+<span class="s0">import </span>android.os.Bundle;
+<span class="s0">import </span>android.os.Message;
+<span class="s0">import </span>android.view.View;
+
+<span class="s0">import </span>com.example.cheatingapp.Adapter.MessagesAdapter;
+<span class="s0">import </span>com.example.cheatingapp.ModelClass.myMessage;
+<span class="s0">import </span>com.example.cheatingapp.databinding.ActivityChatBinding;
+<span class="s0">import </span>com.google.android.gms.tasks.OnSuccessListener;
+<span class="s0">import </span>com.google.firebase.auth.FirebaseAuth;
+<span class="s0">import </span>com.google.firebase.database.DataSnapshot;
+<span class="s0">import </span>com.google.firebase.database.DatabaseError;
+<span class="s0">import </span>com.google.firebase.database.FirebaseDatabase;
+<span class="s0">import </span>com.google.firebase.database.ValueEventListener;
+
+<span class="s0">import </span>java.util.ArrayList;
+<span class="s0">import </span>java.util.Date;
+
+<span class="s0">public class </span>ChatActivity <span class="s0">extends </span>AppCompatActivity {
+ActivityChatBinding binding;
+MessagesAdapter adapter;
+    ArrayList&lt;myMessage&gt; messages;
+String senderRoom, receiverRoom;
+FirebaseDatabase database;
+
+    @Override
+    <span class="s0">protected void </span>onCreate(Bundle savedInstanceState) {
+        <span class="s0">super</span>.onCreate(savedInstanceState);
+        binding=ActivityChatBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        String name=getIntent().getStringExtra(<span class="s2">&quot;name&quot;</span>);
+        String receiverUid=getIntent().getStringExtra(<span class="s2">&quot;uid&quot;</span>);
+        String senderUid= FirebaseAuth.getInstance().getUid();
+
+        messages=<span class="s0">new </span>ArrayList&lt;&gt;();
+        adapter=<span class="s0">new </span>MessagesAdapter(<span class="s0">this</span>,messages,senderRoom,receiverRoom);
+        binding.recyclerView.setLayoutManager(<span class="s0">new </span>LinearLayoutManager(<span class="s0">this</span>));
+        binding.recyclerView.setAdapter(adapter);
+
+
+        senderRoom=senderUid+receiverUid;
+        receiverRoom=receiverUid+senderUid;
+
+        database=FirebaseDatabase.getInstance();
+        database.getReference().child(<span class="s2">&quot;chats&quot;</span>).child(senderRoom).child(<span class="s2">&quot;messages&quot;</span>).addValueEventListener(<span class="s0">new </span>ValueEventListener() {
+                                            @Override
+                                            <span class="s0">public void </span>onDataChange(@NonNull DataSnapshot snapshot) {
+                                                messages.clear();
+                                                <span class="s0">for </span>(DataSnapshot snapshot1:snapshot.getChildren()){
+                                                    myMessage message=snapshot1.getValue(myMessage.<span class="s0">class</span>);
+                                                    message.setMessageId(snapshot1.getKey());
+                                                    messages.add(message);
+                                                }
+                                                adapter.notifyDataSetChanged();
+
+                                            }
+
+                                            @Override
+                                            <span class="s0">public void </span>onCancelled(@NonNull DatabaseError error) {
+
+                                            }
+                                        });
+
+
+        binding.sendBtn.setOnClickListener(<span class="s0">new </span>View.OnClickListener() {
+            @Override
+            <span class="s0">public void </span>onClick(View view) {
+                String messageTxt=binding.messageBox.getText().toString();
+                Date date=<span class="s0">new </span>Date();
+             myMessage  message=<span class="s0">new </span>myMessage(messageTxt,senderUid, date.getTime());
+               binding.messageBox.setText(<span class="s2">&quot;&quot;</span>);
+
+               String randomKey=database.getReference().push().getKey();
+                database.getReference().child(<span class="s2">&quot;chats&quot;</span>).child(senderRoom)
+                        .child(<span class="s2">&quot;messages&quot;</span>)
+                        .child(randomKey)
+                        .setValue(message).addOnSuccessListener(<span class="s0">new </span>OnSuccessListener&lt;Void&gt;() {
+                            @Override
+                            <span class="s0">public void </span>onSuccess(Void unused) {
+                                database.getReference().child(<span class="s2">&quot;chats&quot;</span>)
+                                        .child(receiverRoom)
+                                        .child(<span class="s2">&quot;messages&quot;</span>)
+                                        .child(randomKey)
+                                        .setValue(message).addOnSuccessListener(<span class="s0">new </span>OnSuccessListener&lt;Void&gt;() {
+                                            @Override
+                                            <span class="s0">public void </span>onSuccess(Void unused) {
+
+                                            }
+                                        });
+                            }
+                        });
+
+            }
+        });
+
+        getSupportActionBar().setTitle(name);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(<span class="s0">true</span>);
+    }
+
+    @Override
+    <span class="s0">public boolean </span>onSupportNavigateUp() {
+        finish();
+        <span class="s0">return super</span>.onSupportNavigateUp();
+    }
+}</pre>
+</body>
+</html>
